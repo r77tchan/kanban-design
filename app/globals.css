@@ -1,21 +1,61 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background-light: #f8fafc;
+  --foreground-light: #111827;
+  --surface-light: #ffffff;
+  --surface-foreground-light: #1f2937;
+  --border-light: #cbd5e1;
+  --accent-light: #2563eb;
+  --accent-foreground-light: #ffffff;
+  --focus-light: #1d4ed8;
+
+  --background-dark: #0f172a;
+  --foreground-dark: #f8fafc;
+  --surface-dark: #111827;
+  --surface-foreground-dark: #e5e7eb;
+  --border-dark: #475569;
+  --accent-dark: #60a5fa;
+  --accent-foreground-dark: #0f172a;
+  --focus-dark: #93c5fd;
+
+  --background: var(--background-light);
+  --foreground: var(--foreground-light);
+  --surface: var(--surface-light);
+  --surface-foreground: var(--surface-foreground-light);
+  --border: var(--border-light);
+  --accent: var(--accent-light);
+  --accent-foreground: var(--accent-foreground-light);
+  --focus: var(--focus-light);
+
+  color-scheme: light;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-foreground: var(--surface-foreground);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-focus: var(--focus);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: var(--background-dark);
+    --foreground: var(--foreground-dark);
+    --surface: var(--surface-dark);
+    --surface-foreground: var(--surface-foreground-dark);
+    --border: var(--border-dark);
+    --accent: var(--accent-dark);
+    --accent-foreground: var(--accent-foreground-dark);
+    --focus: var(--focus-dark);
+
+    color-scheme: dark;
   }
 }
 
@@ -23,4 +63,30 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+body:has(input[name="theme"][value="light"]:checked) {
+  --background: var(--background-light);
+  --foreground: var(--foreground-light);
+  --surface: var(--surface-light);
+  --surface-foreground: var(--surface-foreground-light);
+  --border: var(--border-light);
+  --accent: var(--accent-light);
+  --accent-foreground: var(--accent-foreground-light);
+  --focus: var(--focus-light);
+
+  color-scheme: light;
+}
+
+body:has(input[name="theme"][value="dark"]:checked) {
+  --background: var(--background-dark);
+  --foreground: var(--foreground-dark);
+  --surface: var(--surface-dark);
+  --surface-foreground: var(--surface-foreground-dark);
+  --border: var(--border-dark);
+  --accent: var(--accent-dark);
+  --accent-foreground: var(--accent-foreground-dark);
+  --focus: var(--focus-dark);
+
+  color-scheme: dark;
 }
