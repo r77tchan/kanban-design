@@ -17,6 +17,7 @@ type Board = {
   description: string;
   updatedAt: string;
   owner: string;
+  themeColor: string;
   pinned?: boolean;
   isNew?: boolean;
   cardCount: number;
@@ -40,6 +41,7 @@ const boards: Board[] = [
     description: "ロードマップ、仕様検討、リリース準備",
     updatedAt: "今日 10:24",
     owner: "Product",
+    themeColor: "#0f766e",
     pinned: true,
     cardCount: 34,
     columns: ["Ideas", "Spec", "Build", "QA", "Launch"],
@@ -57,6 +59,7 @@ const boards: Board[] = [
     description: "UI確認、文言調整、アクセシビリティ改善",
     updatedAt: "昨日 18:10",
     owner: "Design",
+    themeColor: "#7c3aed",
     pinned: true,
     cardCount: 27,
     columns: ["Brief", "Wire", "Review", "Handoff"],
@@ -72,6 +75,7 @@ const boards: Board[] = [
     description: "提案準備、商談、契約確認、導入フォロー",
     updatedAt: "6月12日",
     owner: "Sales",
+    themeColor: "#d97706",
     isNew: true,
     cardCount: 48,
     columns: ["Lead", "Meeting", "Proposal", "Contract", "Onboard"],
@@ -91,6 +95,7 @@ const boards: Board[] = [
     description: "候補者対応、面談調整、評価、オファー管理",
     updatedAt: "6月10日",
     owner: "People",
+    themeColor: "#e11d48",
     cardCount: 30,
     columns: ["応募", "面談", "評価", "内定"],
     members: [
@@ -248,8 +253,13 @@ function BoardCard({
         <div className="flex items-start gap-3">
           <div className="min-w-0 flex-1 space-y-2">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <h3 className="text-foreground text-lg font-semibold">
-                {board.name}
+              <h3 className="text-foreground text-lg leading-7 font-semibold">
+                <span
+                  className="inline-block border-b-2 pb-0.5"
+                  style={{ borderColor: board.themeColor }}
+                >
+                  {board.name}
+                </span>
               </h3>
               <p className="text-muted text-xs font-medium">
                 所有チーム{" "}
