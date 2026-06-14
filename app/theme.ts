@@ -1,9 +1,9 @@
-export const themeValues = ["light", "auto", "dark"] as const;
+const themeValues = ["light", "auto", "dark"] as const;
 
 export type Theme = (typeof themeValues)[number];
 
 export const DEFAULT_THEME: Theme = "auto";
-export const THEME_STORAGE_KEY = "theme";
+const THEME_STORAGE_KEY = "theme";
 
 const serializedThemeValues = JSON.stringify(themeValues);
 
