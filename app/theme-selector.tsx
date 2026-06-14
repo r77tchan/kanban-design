@@ -13,25 +13,26 @@ const options = [
 
 export function ThemeSelector() {
   return (
-    <fieldset className="border-border bg-surface text-surface-foreground flex gap-2 rounded-lg border p-2">
-      <legend className="text-foreground px-2">テーマ</legend>
+    <fieldset className="border-border bg-surface-muted text-muted flex gap-px rounded-md border p-px select-none">
+      <legend className="sr-only">テーマ</legend>
       {options.map((option) => {
         const Icon = option.Icon;
 
         return (
           <label
-            className="focus-within:outline-focus has-checked:bg-accent has-checked:text-accent-foreground flex min-w-22 cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 focus-within:outline-2 focus-within:outline-offset-2"
+            className="focus-within:outline-focus has-checked:bg-brand has-checked:text-brand-foreground grid size-8 cursor-pointer place-items-center rounded select-none focus-within:outline-2 focus-within:outline-offset-2"
             key={option.value}
+            title={option.label}
           >
             <input
-              className="accent-accent"
+              aria-label={option.label}
+              className="sr-only"
               defaultChecked={option.value === DEFAULT_THEME}
               name="theme"
               type="radio"
               value={option.value}
             />
             <Icon aria-hidden="true" size={16} strokeWidth={1.8} />
-            {option.label}
           </label>
         );
       })}
