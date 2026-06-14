@@ -13,6 +13,7 @@ import Image from "next/image";
 import { ThemeSelector } from "./theme-selector";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const memberDisplaySlotCount = 6;
 
 type Board = {
   name: string;
@@ -245,6 +246,12 @@ function BoardCard({
   board: Board;
   isPinned?: boolean;
 }) {
+  const visibleMemberCount =
+    board.members.length > memberDisplaySlotCount
+      ? memberDisplaySlotCount - 1
+      : memberDisplaySlotCount;
+  const hiddenMemberCount = board.members.length - visibleMemberCount;
+
   return (
     <article
       aria-label={`${board.name} のボードカード`}
@@ -315,7 +322,7 @@ function BoardCard({
             aria-label={`${board.name} の参加メンバー`}
             className="flex shrink-0 -space-x-2"
           >
-            {board.members.slice(0, 4).map((member) => (
+            {board.members.slice(0, visibleMemberCount).map((member) => (
               <span
                 aria-label={member.name}
                 className="border-surface grid size-8 place-items-center rounded-full border-2 text-xs font-semibold text-white shadow-sm"
@@ -327,14 +334,14 @@ function BoardCard({
                 {member.initial}
               </span>
             ))}
-            {board.members.length > 4 ? (
+            {hiddenMemberCount > 0 ? (
               <span
-                aria-label={`ほか${board.members.length - 4}人`}
+                aria-label={`ほか${hiddenMemberCount}人`}
                 className="border-surface bg-surface-muted text-surface-foreground grid size-8 place-items-center rounded-full border-2 text-xs font-semibold shadow-sm"
                 role="img"
-                title={`ほか${board.members.length - 4}人`}
+                title={`ほか${hiddenMemberCount}人`}
               >
-                +{board.members.length - 4}
+                +{hiddenMemberCount}
               </span>
             ) : null}
           </div>
