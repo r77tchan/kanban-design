@@ -12,6 +12,8 @@ import {
 import Image from "next/image";
 import { ThemeSelector } from "./theme-selector";
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 type Board = {
   name: string;
   description: string;
@@ -122,7 +124,7 @@ export default function Home() {
                 <Image
                   alt=""
                   height={30}
-                  src="/skym-logo.ico"
+                  src={`${basePath}/skym-logo.ico`}
                   unoptimized
                   width={30}
                 />
