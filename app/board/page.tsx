@@ -24,7 +24,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 
 type Member = {
   name: string;
@@ -89,6 +89,15 @@ type WorkspaceLayoutProps = {
   isWorkspaceWide: boolean;
   onWorkspaceWideToggle: () => void;
 };
+
+const viewOptions = [
+  { label: "カンバン", value: "kanban", Icon: Kanban },
+  { label: "ガント", value: "gantt", Icon: ChartGantt },
+] satisfies Array<{
+  label: string;
+  value: ViewMode;
+  Icon: typeof Kanban;
+}>;
 
 const members: Member[] = [
   { name: "山田 太郎", initial: "山", color: "#0f766e" },
@@ -477,6 +486,66 @@ export default function BoardPage() {
   const [view, setView] = useState<ViewMode>("kanban");
   const [isWorkspaceWide, setIsWorkspaceWide] = useState(false);
 
+  const selectView = (
+    nextView: ViewMode,
+    groupElement?: HTMLFieldSetElement,
+  ) => {
+    setView(nextView);
+
+    if (groupElement) {
+      window.requestAnimationFrame(() => {
+        groupElement
+          .querySelector<HTMLInputElement>(
+            `input[name="board-view-mode"][value="${nextView}"]`,
+          )
+          ?.focus();
+      });
+    }
+  };
+
+  const handleViewKeyDown = (event: KeyboardEvent<HTMLFieldSetElement>) => {
+    const target = event.target;
+
+    if (
+      !(target instanceof HTMLInputElement) ||
+      target.name !== "board-view-mode"
+    ) {
+      return;
+    }
+
+    const currentIndex = viewOptions.findIndex(
+      (option) => option.value === target.value,
+    );
+    if (currentIndex === -1) {
+      return;
+    }
+
+    let nextIndex = currentIndex;
+
+    switch (event.key) {
+      case "ArrowRight":
+      case "ArrowDown":
+        nextIndex = (currentIndex + 1) % viewOptions.length;
+        break;
+      case "ArrowLeft":
+      case "ArrowUp":
+        nextIndex =
+          (currentIndex - 1 + viewOptions.length) % viewOptions.length;
+        break;
+      case "Home":
+        nextIndex = 0;
+        break;
+      case "End":
+        nextIndex = viewOptions.length - 1;
+        break;
+      default:
+        return;
+    }
+
+    event.preventDefault();
+    selectView(viewOptions[nextIndex].value, event.currentTarget);
+  };
+
   return (
     <main className="bg-background flex flex-1 flex-col">
       <div className="mx-auto flex w-full max-w-[112rem] flex-1 flex-col gap-5 px-4 py-6 sm:px-6 lg:px-8">
@@ -503,34 +572,34 @@ export default function BoardPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                <div
-                  aria-label="表示切り替え"
-                  className="border-border bg-surface-muted flex h-10 gap-px rounded-md border p-px"
-                  role="group"
+                <fieldset
+                  className="border-border bg-surface-muted flex h-10 gap-px rounded-md border p-px select-none"
+                  onKeyDown={handleViewKeyDown}
                 >
-                  <button
-                    aria-pressed={view === "kanban"}
-                    className={viewToggleClass(view === "kanban")}
-                    onClick={() => setView("kanban")}
-                    type="button"
-                  >
-                    <Kanban aria-hidden="true" size={16} strokeWidth={1.8} />
-                    カンバン
-                  </button>
-                  <button
-                    aria-pressed={view === "gantt"}
-                    className={viewToggleClass(view === "gantt")}
-                    onClick={() => setView("gantt")}
-                    type="button"
-                  >
-                    <ChartGantt
-                      aria-hidden="true"
-                      size={16}
-                      strokeWidth={1.8}
-                    />
-                    ガント
-                  </button>
-                </div>
+                  <legend className="sr-only">表示切り替え</legend>
+                  {viewOptions.map((option) => {
+                    const Icon = option.Icon;
+
+                    return (
+                      <label
+                        className={viewToggleClass(view === option.value)}
+                        key={option.value}
+                      >
+                        <input
+                          checked={view === option.value}
+                          className="sr-only"
+                          name="board-view-mode"
+                          onChange={() => selectView(option.value)}
+                          tabIndex={view === option.value ? 0 : -1}
+                          type="radio"
+                          value={option.value}
+                        />
+                        <Icon aria-hidden="true" size={16} strokeWidth={1.8} />
+                        {option.label}
+                      </label>
+                    );
+                  })}
+                </fieldset>
 
                 <button
                   className="bg-brand text-brand-foreground focus-visible:outline-focus flex h-10 cursor-pointer items-center gap-2 rounded-md px-3 text-sm font-semibold select-none hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2"
@@ -626,8 +695,8 @@ export default function BoardPage() {
 
 function viewToggleClass(isActive: boolean) {
   return isActive
-    ? "bg-brand text-brand-foreground focus-visible:outline-focus flex cursor-pointer items-center gap-2 rounded px-3 text-sm font-semibold select-none focus-visible:outline-2 focus-visible:outline-offset-2"
-    : "text-muted hover:bg-surface hover:text-foreground focus-visible:outline-focus flex cursor-pointer items-center gap-2 rounded px-3 text-sm font-medium select-none focus-visible:outline-2 focus-visible:outline-offset-2";
+    ? "bg-brand text-brand-foreground focus-within:outline-focus flex cursor-pointer items-center gap-2 rounded px-3 text-sm font-semibold select-none focus-within:outline-2 focus-within:outline-offset-2"
+    : "text-muted hover:bg-surface hover:text-foreground focus-within:outline-focus flex cursor-pointer items-center gap-2 rounded px-3 text-sm font-medium select-none focus-within:outline-2 focus-within:outline-offset-2";
 }
 
 function KanbanWorkspace({
@@ -984,6 +1053,7 @@ function KanbanColumn({ column }: { column: Column }) {
         <button
           aria-label={`${column.title}をドラッグ`}
           className="border-border bg-surface text-muted hover:border-border-strong hover:text-foreground focus-visible:outline-focus grid size-8 shrink-0 cursor-grab place-items-center rounded-md border select-none focus-visible:outline-2 focus-visible:outline-offset-2 active:cursor-grabbing"
+          tabIndex={-1}
           title="ドラッグ"
           type="button"
         >
@@ -1029,8 +1099,14 @@ function TaskCard({ card }: { card: Card }) {
   const dueDateLabel = getDueDateLabel(card.dueDate);
 
   return (
-    <article className="border-border bg-surface text-surface-foreground hover:border-border-strong rounded-md border p-3 shadow-sm select-none hover:cursor-pointer hover:shadow-md">
-      <div className="space-y-3">
+    <article className="task-card border-border bg-surface text-surface-foreground hover:border-border-strong focus-within:border-border-strong relative rounded-md border p-3 shadow-sm select-none focus-within:shadow-md hover:cursor-pointer hover:shadow-md">
+      <button
+        aria-label={`${card.title}を開く`}
+        className="task-card-button focus-visible:outline-focus absolute inset-0 z-0 cursor-pointer rounded-md border-0 bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-offset-2"
+        type="button"
+      />
+
+      <div className="pointer-events-none relative z-10 space-y-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <h4 className="text-foreground text-sm leading-5 font-semibold">
