@@ -229,6 +229,7 @@ function BoardCard({
               data-drag-handle
               aria-label={`${board.name}をドラッグ`}
               className="border-border bg-surface text-muted pointer-events-auto grid size-7 shrink-0 cursor-grab place-items-center rounded border select-none active:cursor-grabbing"
+              tabIndex={-1}
               type="button"
             >
               <Grip aria-hidden="true" size={15} strokeWidth={1.9} />
