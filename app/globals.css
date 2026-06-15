@@ -97,6 +97,18 @@ html {
   user-select: none;
 }
 
+.new-board-text-input:placeholder-shown {
+  user-select: none;
+}
+
+.new-board-text-input:not(:placeholder-shown) {
+  user-select: text;
+}
+
+.new-board-text-input::placeholder {
+  user-select: none;
+}
+
 .board-card:hover,
 .board-card:focus-visible {
   border-color: var(--border-strong);

@@ -5,10 +5,10 @@ import {
   Grip,
   Layers3,
   Pin,
-  Plus,
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import { NewBoardDialogLauncher } from "./new-board-dialog";
 
 const memberDisplaySlotCount = 6;
 
@@ -117,13 +117,7 @@ export default function Home() {
             </h1>
           </div>
 
-          <button
-            className="bg-brand text-brand-foreground focus-visible:outline-focus flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold select-none hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-auto"
-            type="button"
-          >
-            <Plus aria-hidden="true" size={17} strokeWidth={1.8} />
-            新規ボード
-          </button>
+          <NewBoardDialogLauncher owner={currentUser} />
         </section>
 
         <section aria-labelledby="pinned-boards-title" className="space-y-3">
