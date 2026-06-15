@@ -4,22 +4,18 @@ import {
   Columns3,
   Grip,
   Layers3,
-  LogOut,
   Pin,
   Plus,
   Users,
 } from "lucide-react";
-import Image from "next/image";
-import { ThemeSelector } from "./theme-selector";
+import Link from "next/link";
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const memberDisplaySlotCount = 6;
 
 type Board = {
   name: string;
   description: string;
   updatedAt: string;
-  owner: string;
   themeColor: string;
   pinned?: boolean;
   isNew?: boolean;
@@ -43,7 +39,6 @@ const boards: Board[] = [
     name: "プロダクト計画",
     description: "ロードマップ、仕様検討、リリース準備",
     updatedAt: "今日 10:24",
-    owner: "Product",
     themeColor: "#0f766e",
     pinned: true,
     cardCount: 34,
@@ -61,7 +56,6 @@ const boards: Board[] = [
     name: "デザイン運用",
     description: "UI確認、文言調整、アクセシビリティ改善",
     updatedAt: "昨日 18:10",
-    owner: "Design",
     themeColor: "#7c3aed",
     pinned: true,
     cardCount: 27,
@@ -77,7 +71,6 @@ const boards: Board[] = [
     name: "営業パイプライン",
     description: "提案準備、商談、契約確認、導入フォロー",
     updatedAt: "6月12日",
-    owner: "Sales",
     themeColor: "#d97706",
     isNew: true,
     cardCount: 48,
@@ -97,7 +90,6 @@ const boards: Board[] = [
     name: "採用プロセス",
     description: "候補者対応、面談調整、評価、オファー管理",
     updatedAt: "6月10日",
-    owner: "People",
     themeColor: "#e11d48",
     cardCount: 30,
     columns: ["応募", "面談", "評価", "内定"],
@@ -116,56 +108,7 @@ const recentBoards = boards.filter((board) => !board.pinned);
 
 export default function Home() {
   return (
-    <div className="bg-background min-h-screen">
-      <header className="border-border bg-surface border-b">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex min-w-0 items-center gap-3">
-              <span className="border-border grid size-10 shrink-0 place-items-center rounded-md border bg-white">
-                <Image
-                  alt=""
-                  height={30}
-                  src={`${basePath}/skym-logo.ico`}
-                  unoptimized
-                  width={30}
-                />
-              </span>
-              <div className="min-w-0">
-                <p className="text-foreground truncate text-sm font-semibold">
-                  SKYM Kanban
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-              <button
-                aria-label={`${currentUser.name}のプロフィール`}
-                className="border-border bg-surface-muted text-surface-foreground focus-visible:outline-focus hover:bg-surface hover:text-foreground flex h-9 cursor-pointer items-center gap-2 rounded-md border px-2.5 text-sm font-medium select-none focus-visible:outline-2 focus-visible:outline-offset-2"
-                title="プロフィール"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  className="grid size-6 place-items-center rounded-full text-xs font-semibold text-white"
-                  style={{ backgroundColor: currentUser.color }}
-                >
-                  {currentUser.initial}
-                </span>
-                {currentUser.name}
-              </button>
-              <ThemeSelector />
-              <button
-                className="border-border bg-surface-muted text-surface-foreground focus-visible:outline-focus hover:bg-surface hover:text-foreground flex h-9 cursor-pointer items-center justify-center gap-2 rounded-md border px-2.5 text-sm font-medium select-none focus-visible:outline-2 focus-visible:outline-offset-2"
-                type="button"
-              >
-                <LogOut aria-hidden="true" size={16} strokeWidth={1.8} />
-                ログアウト
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <div className="bg-background flex flex-1 flex-col">
       <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <section className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="min-w-0">
@@ -253,12 +196,14 @@ function BoardCard({
   const hiddenMemberCount = board.members.length - visibleMemberCount;
 
   return (
-    <article
-      aria-label={`${board.name} のボードカード`}
-      className="board-card border-border bg-surface text-surface-foreground rounded-lg border p-5 shadow-sm select-none"
-      tabIndex={0}
-    >
-      <div className="flex min-h-full flex-col gap-5">
+    <article className="board-card border-border bg-surface text-surface-foreground relative flex min-h-full flex-col gap-5 rounded-lg border p-5 shadow-sm select-none">
+      <Link
+        aria-label={`${board.name} のボードを開く`}
+        className="board-card-link absolute inset-0 z-0 rounded-lg"
+        href="/board"
+      />
+
+      <div className="pointer-events-none relative z-10 flex min-h-full flex-col gap-5">
         <div className="flex items-start gap-3">
           <div className="min-w-0 flex-1 space-y-2">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -270,10 +215,6 @@ function BoardCard({
                   {board.name}
                 </span>
               </h3>
-              <p className="text-muted text-xs font-medium">
-                所有チーム{" "}
-                <span className="text-surface-foreground">{board.owner}</span>
-              </p>
               {board.isNew ? (
                 <span className="bg-status-new-soft text-status-new-foreground rounded-md px-2 py-0.5 text-xs font-semibold">
                   新着
@@ -286,10 +227,8 @@ function BoardCard({
           {isPinned ? (
             <button
               data-drag-handle
-              aria-label="並び替え"
-              className="border-border bg-surface text-muted focus-visible:outline-focus hover:border-border-strong hover:bg-surface-muted hover:text-foreground grid size-7 shrink-0 cursor-grab place-items-center rounded border select-none focus-visible:outline-2 focus-visible:outline-offset-2 active:cursor-grabbing"
-              tabIndex={-1}
-              title="ドラッグして並び替え"
+              aria-label={`${board.name}をドラッグ`}
+              className="border-border bg-surface text-muted pointer-events-auto grid size-7 shrink-0 cursor-grab place-items-center rounded border select-none active:cursor-grabbing"
               type="button"
             >
               <Grip aria-hidden="true" size={15} strokeWidth={1.9} />

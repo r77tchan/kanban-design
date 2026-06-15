@@ -17,6 +17,16 @@
   --brand-soft-foreground: light-dark(#004b9b, #b9e8ff);
   --status-new-soft: light-dark(#dcfce7, #063c2e);
   --status-new-foreground: light-dark(#166534, #bbf7d0);
+  --success-soft: light-dark(#dcfce7, #063c2e);
+  --success-foreground: light-dark(#166534, #bbf7d0);
+  --warning-soft: light-dark(#fef3c7, #3a2a08);
+  --warning-foreground: light-dark(#92400e, #fde68a);
+  --danger-soft: light-dark(#fee2e2, #3f1d27);
+  --danger-foreground: light-dark(#b91c1c, #fecdd3);
+  --info-soft: light-dark(#e0f2fe, #082f49);
+  --info-foreground: light-dark(#075985, #bae6fd);
+  --violet-soft: light-dark(#f3e8ff, #2e1065);
+  --violet-foreground: light-dark(#6b21a8, #ddd6fe);
   --focus: light-dark(#2563eb, #6ed4ff);
 
   color-scheme: light dark;
@@ -39,6 +49,16 @@
   --color-brand-soft-foreground: var(--brand-soft-foreground);
   --color-status-new-soft: var(--status-new-soft);
   --color-status-new-foreground: var(--status-new-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-info-soft: var(--info-soft);
+  --color-info-foreground: var(--info-foreground);
+  --color-violet-soft: var(--violet-soft);
+  --color-violet-foreground: var(--violet-foreground);
   --color-focus: var(--focus);
   --font-sans: var(--font-noto-sans-jp);
 }
@@ -61,6 +81,22 @@ body {
   font-family: var(--font-sans);
 }
 
+html {
+  overflow-y: scroll;
+}
+
+.board-search-input:placeholder-shown {
+  user-select: none;
+}
+
+.board-search-input:not(:placeholder-shown) {
+  user-select: text;
+}
+
+.board-search-input::placeholder {
+  user-select: none;
+}
+
 .board-card:hover,
 .board-card:focus-visible {
   border-color: var(--border-strong);
@@ -71,7 +107,7 @@ body {
   cursor: pointer;
 }
 
-.board-card:focus-visible {
+.board-card:has(.board-card-link:focus-visible) {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
@@ -80,5 +116,9 @@ body {
   border-color: var(--border);
   background: var(--surface);
   box-shadow: 0 1px 2px 0 rgb(15 23 42 / 0.05);
-  cursor: default;
+  cursor: grab;
+}
+
+.board-card:has([data-drag-handle]:active) {
+  cursor: grabbing;
 }
