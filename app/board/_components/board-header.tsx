@@ -113,7 +113,12 @@ export function BoardHeader({
 
             <div className="space-y-2">
               <h1 className="text-foreground text-2xl font-bold tracking-normal sm:text-3xl">
-                {board.name}
+                <span
+                  className="inline-block border-b-2 pb-1"
+                  style={{ borderColor: board.themeColor }}
+                >
+                  {board.name}
+                </span>
               </h1>
               <p className="text-surface-foreground max-w-3xl text-sm leading-6">
                 {board.description}
