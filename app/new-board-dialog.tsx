@@ -273,7 +273,7 @@ function NewBoardDialog({
             <div className="space-y-6">
               <section
                 aria-labelledby="new-board-basic-title"
-                className="space-y-4"
+                className="space-y-6"
               >
                 <h3
                   className="text-foreground text-sm font-semibold"
@@ -282,7 +282,7 @@ function NewBoardDialog({
                   基本情報
                 </h3>
 
-                <label className="space-y-2">
+                <label className="block space-y-2">
                   <span className="text-foreground flex items-center gap-1.5 text-sm font-semibold">
                     <Type aria-hidden="true" size={15} strokeWidth={1.8} />
                     ボード名
@@ -296,7 +296,7 @@ function NewBoardDialog({
                   />
                 </label>
 
-                <label className="space-y-2">
+                <label className="block space-y-2">
                   <span className="text-foreground flex items-center gap-1.5 text-sm font-semibold">
                     <AlignLeft aria-hidden="true" size={15} strokeWidth={1.8} />
                     説明
