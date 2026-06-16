@@ -375,13 +375,19 @@ function NewBoardDialog({
               onClick={onClose}
               type="button"
             >
-              キャンセル
+              <span>キャンセル</span>
+              <kbd className="border-border bg-surface text-muted rounded border px-1.5 py-0.5 text-[11px] leading-none font-semibold">
+                Esc
+              </kbd>
             </button>
             <button
               className="bg-brand text-brand-foreground focus-visible:outline-focus flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2"
               type="submit"
             >
-              作成
+              <span>作成</span>
+              <kbd className="border-brand-foreground/40 bg-brand-foreground/15 rounded border px-1.5 py-0.5 text-[11px] leading-none font-semibold">
+                ⌘↵
+              </kbd>
             </button>
           </div>
         </form>
