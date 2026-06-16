@@ -13,12 +13,12 @@ import {
 } from "lucide-react";
 import {
   useCallback,
-  useEffect,
   useRef,
   useState,
   type FormEvent,
-  type KeyboardEvent,
+  type RefObject,
 } from "react";
+import { useDialogBehavior } from "@/app/_hooks/use-dialog-behavior";
 
 type NewBoardDialogLauncherProps = {
   owner: {
@@ -27,15 +27,6 @@ type NewBoardDialogLauncherProps = {
     color: string;
   };
 };
-
-const focusableDialogElementSelector = [
-  "a[href]",
-  "button:not([disabled])",
-  'input:not([disabled]):not([type="hidden"])',
-  "select:not([disabled])",
-  "textarea:not([disabled])",
-  '[tabindex]:not([tabindex="-1"])',
-].join(", ");
 
 const boardTemplateOptions = [
   {
@@ -72,25 +63,12 @@ const themeColorOptions = [
 type BoardTemplateId = (typeof boardTemplateOptions)[number]["id"];
 type ThemeColorValue = (typeof themeColorOptions)[number]["value"];
 
-function getFocusableDialogElements(container: HTMLElement) {
-  return Array.from(
-    container.querySelectorAll<HTMLElement>(focusableDialogElementSelector),
-  ).filter(
-    (element) =>
-      element.getAttribute("aria-hidden") !== "true" &&
-      element.getClientRects().length > 0,
-  );
-}
-
 export function NewBoardDialogLauncher({ owner }: NewBoardDialogLauncherProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   const handleClose = useCallback(() => {
     setIsDialogOpen(false);
-    window.requestAnimationFrame(() => {
-      triggerRef.current?.focus({ preventScroll: true });
-    });
   }, []);
 
   return (
@@ -108,7 +86,11 @@ export function NewBoardDialogLauncher({ owner }: NewBoardDialogLauncherProps) {
       </button>
 
       {isDialogOpen ? (
-        <NewBoardDialog onClose={handleClose} owner={owner} />
+        <NewBoardDialog
+          onClose={handleClose}
+          owner={owner}
+          restoreFocusRef={triggerRef}
+        />
       ) : null}
     </>
   );
@@ -117,9 +99,11 @@ export function NewBoardDialogLauncher({ owner }: NewBoardDialogLauncherProps) {
 function NewBoardDialog({
   onClose,
   owner,
+  restoreFocusRef,
 }: {
   onClose: () => void;
   owner: NewBoardDialogLauncherProps["owner"];
+  restoreFocusRef: RefObject<HTMLButtonElement | null>;
 }) {
   const [selectedTemplate, setSelectedTemplate] =
     useState<BoardTemplateId>("standard");
@@ -128,99 +112,12 @@ function NewBoardDialog({
   );
   const panelRef = useRef<HTMLDivElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const scrollY = window.scrollY;
-    const previousBodyPosition = document.body.style.position;
-    const previousBodyTop = document.body.style.top;
-    const previousBodyWidth = document.body.style.width;
-    const previousBodyOverflow = document.body.style.overflow;
-
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = "100%";
-    document.body.style.overflow = "hidden";
-
-    window.requestAnimationFrame(() => {
-      nameInputRef.current?.focus({ preventScroll: true });
-    });
-
-    const handleDocumentKeyDown = (event: globalThis.KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleDocumentKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleDocumentKeyDown);
-      document.body.style.position = previousBodyPosition;
-      document.body.style.top = previousBodyTop;
-      document.body.style.width = previousBodyWidth;
-      document.body.style.overflow = previousBodyOverflow;
-      window.scrollTo(0, scrollY);
-    };
-  }, [onClose]);
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== "Tab") {
-      return;
-    }
-
-    const panel = panelRef.current;
-
-    if (!panel) {
-      return;
-    }
-
-    const focusableElements = getFocusableDialogElements(panel);
-
-    if (focusableElements.length === 0) {
-      event.preventDefault();
-      panel.focus();
-      return;
-    }
-
-    const firstFocusableElement = focusableElements[0];
-    const lastFocusableElement =
-      focusableElements[focusableElements.length - 1];
-    const activeElement = document.activeElement;
-    const activeElementIndex = focusableElements.findIndex(
-      (element) => element === activeElement,
-    );
-
-    event.preventDefault();
-
-    if (event.shiftKey) {
-      if (
-        activeElement === firstFocusableElement ||
-        activeElement === panel ||
-        !panel.contains(activeElement) ||
-        activeElementIndex <= 0
-      ) {
-        lastFocusableElement.focus();
-        return;
-      }
-
-      focusableElements[activeElementIndex - 1].focus();
-      return;
-    }
-
-    if (
-      activeElement === lastFocusableElement ||
-      activeElement === panel ||
-      !panel.contains(activeElement) ||
-      activeElementIndex === -1 ||
-      activeElementIndex >= focusableElements.length - 1
-    ) {
-      firstFocusableElement.focus();
-      return;
-    }
-
-    focusableElements[activeElementIndex + 1].focus();
-  };
+  const handleKeyDown = useDialogBehavior({
+    initialFocusRef: nameInputRef,
+    onClose,
+    panelRef,
+    restoreFocusRef,
+  });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

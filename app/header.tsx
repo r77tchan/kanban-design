@@ -3,43 +3,12 @@
 import { Camera, KeyRound, LogOut, Mail, User, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type KeyboardEvent,
-} from "react";
+import { useCallback, useRef, useState, type RefObject } from "react";
+import { useDialogBehavior } from "@/app/_hooks/use-dialog-behavior";
+import { currentUser } from "@/app/_lib/users";
 import { ThemeSelector } from "./theme-selector";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-
-const currentUser = {
-  name: "山田 太郎",
-  initial: "山",
-  color: "#0f766e",
-  email: "taro.yamada@example.com",
-  passwordUpdatedAt: "2026/06/01",
-};
-
-const focusableModalElementSelector = [
-  "a[href]",
-  "button:not([disabled])",
-  'input:not([disabled]):not([type="hidden"])',
-  "select:not([disabled])",
-  "textarea:not([disabled])",
-  '[tabindex]:not([tabindex="-1"])',
-].join(", ");
-
-function getFocusableModalElements(container: HTMLElement) {
-  return Array.from(
-    container.querySelectorAll<HTMLElement>(focusableModalElementSelector),
-  ).filter(
-    (element) =>
-      element.getAttribute("aria-hidden") !== "true" &&
-      element.getClientRects().length > 0,
-  );
-}
 
 export function Header() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -47,9 +16,6 @@ export function Header() {
 
   const handleProfileModalClose = useCallback(() => {
     setIsProfileModalOpen(false);
-    window.requestAnimationFrame(() => {
-      profileButtonRef.current?.focus({ preventScroll: true });
-    });
   }, []);
 
   return (
@@ -109,110 +75,28 @@ export function Header() {
       </div>
 
       {isProfileModalOpen ? (
-        <ProfileSettingsModal onClose={handleProfileModalClose} />
+        <ProfileSettingsModal
+          onClose={handleProfileModalClose}
+          restoreFocusRef={profileButtonRef}
+        />
       ) : null}
     </header>
   );
 }
 
-function ProfileSettingsModal({ onClose }: { onClose: () => void }) {
+function ProfileSettingsModal({
+  onClose,
+  restoreFocusRef,
+}: {
+  onClose: () => void;
+  restoreFocusRef: RefObject<HTMLButtonElement | null>;
+}) {
   const panelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const scrollY = window.scrollY;
-    const previousBodyPosition = document.body.style.position;
-    const previousBodyTop = document.body.style.top;
-    const previousBodyWidth = document.body.style.width;
-    const previousBodyOverflow = document.body.style.overflow;
-
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = "100%";
-    document.body.style.overflow = "hidden";
-
-    const panel = panelRef.current;
-    const firstFocusableElement = panel
-      ? getFocusableModalElements(panel)[0]
-      : null;
-
-    firstFocusableElement?.focus({ preventScroll: true });
-
-    const handleDocumentKeyDown = (event: globalThis.KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleDocumentKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleDocumentKeyDown);
-      document.body.style.position = previousBodyPosition;
-      document.body.style.top = previousBodyTop;
-      document.body.style.width = previousBodyWidth;
-      document.body.style.overflow = previousBodyOverflow;
-      window.scrollTo(0, scrollY);
-    };
-  }, [onClose]);
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== "Tab") {
-      return;
-    }
-
-    const panel = panelRef.current;
-
-    if (!panel) {
-      return;
-    }
-
-    const focusableElements = getFocusableModalElements(panel);
-
-    if (focusableElements.length === 0) {
-      event.preventDefault();
-      panel.focus();
-      return;
-    }
-
-    const firstFocusableElement = focusableElements[0];
-    const lastFocusableElement =
-      focusableElements[focusableElements.length - 1];
-    const activeElement = document.activeElement;
-    const activeElementIndex = focusableElements.findIndex(
-      (element) => element === activeElement,
-    );
-
-    event.preventDefault();
-
-    if (event.shiftKey) {
-      if (
-        activeElement === firstFocusableElement ||
-        activeElement === panel ||
-        !panel.contains(activeElement) ||
-        activeElementIndex <= 0
-      ) {
-        lastFocusableElement.focus();
-        return;
-      }
-
-      focusableElements[activeElementIndex - 1].focus();
-      return;
-    }
-
-    if (
-      activeElement === lastFocusableElement ||
-      activeElement === panel ||
-      !panel.contains(activeElement) ||
-      activeElementIndex === -1 ||
-      activeElementIndex >= focusableElements.length - 1
-    ) {
-      firstFocusableElement.focus();
-      return;
-    }
-
-    focusableElements[activeElementIndex + 1].focus();
-  };
+  const handleKeyDown = useDialogBehavior({
+    onClose,
+    panelRef,
+    restoreFocusRef,
+  });
 
   return (
     <div
